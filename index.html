@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diwali Night Registration ✨</title>
+<style>
+body { font-family: Arial, sans-serif; background:#fdfaf7; color:#2b2b2b; margin:0; padding:0; }
+.container { max-width:700px; margin:20px auto; padding:20px; background:#fff; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+h1,h2 { color:#b89263; }
+input, select { width:90%; padding:10px; margin:8px 0; border-radius:6px; border:1px solid #ccc; }
+button { padding:10px 18px; border:none; border-radius:6px; background:#d8b384; color:#fff; cursor:pointer; margin:5px 0; }
+button:hover { background:#b89263; }
+.person-fields { background:#fffaf7; padding:10px; border-radius:8px; margin-bottom:8px; }
+.step { display:none; }
+.step.active { display:block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>✨ Diwali Night Registration</h1>
+
+  <form id="diwaliForm" action="https://script.google.com/macros/s/AKfycbx3-QYImVQGlTdY6J9Plhr72_l-a2t03E3PUx_ZvnZRk4vUsS4ITwqmwFYBqNLEvLKi/exec" method="POST" enctype="multipart/form-data">
+
+    <!-- STEP 1: Main Person -->
+    <div class="step active" id="step1">
+      <h2>Main Person</h2>
+      <input name="main_name" placeholder="Full name" required>
+      <input name="main_instagram" placeholder="Instagram handle" required>
+      <input name="main_mobile" placeholder="Mobile number" required>
+      <input name="main_email" type="email" placeholder="Email" required>
+      <select name="main_gender" required>
+        <option value="">Select gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <button type="button" onclick="nextStep(1)">Next</button>
+    </div>
+
+    <!-- STEP 2: Guests -->
+    <div class="step" id="step2">
+      <h2>Guests</h2>
+      <div id="guestsContainer"></div>
+      <button type="button" onclick="addGuest()">Add Guest</button>
+      <br>
+      <button type="button" onclick="prevStep(2)">Back</button>
+      <button type="button" onclick="nextStep(2)">Next</button>
+    </div>
+
+    <!-- STEP 3: Payment -->
+    <div class="step" id="step3">
+      <h2>Payment</h2>
+      <p>Scan QR below and upload screenshot:</p>
+      <img src="or.jpg" alt="UPI QR" style="width:200px;display:block;margin:10px 0;">
+      <input type="file" name="screenshot" accept="image/*" required>
+      <input name="upiTxn" placeholder="UPI Transaction ID" required>
+      <br>
+      <button type="button" onclick="prevStep(3)">Back</button>
+      <button type="submit">Submit Registration</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+let currentStep = 1;
+
+function showStep(step){
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step'+step).classList.add('active');
+  currentStep = step;
+}
+
+function nextStep(step){ showStep(step+1); }
+function prevStep(step){ showStep(step-1); }
+
+function addGuest(){
+  const container = document.getElementById('guestsContainer');
+  const div = document.createElement('div');
+  div.className = 'person-fields';
+  div.innerHTML = `
+    <input name="guest_name[]" placeholder="Guest full name" required>
+    <input name="guest_instagram[]" placeholder="Guest Instagram" required>
+    <select name="guest_gender[]" required>
+      <option value="">Select gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <button type="button" onclick="this.parentNode.remove()">Remove Guest</button>
+  `;
+  container.appendChild(div);
+}
+</script>
+</body>
+</html>
