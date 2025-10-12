@@ -285,10 +285,144 @@ document.getElementById('main_gender').addEventListener('change', calculateAndSh
 document.getElementById('numPeople').addEventListener('input', ()=>{/* no auto-generate until next pressed */});
 
 /* submit handler */
-// ---- SUBMIT HANDLER FIX ----
-document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
+<script>
+/* ---------- HELPER FUNCTIONS ---------- */
+const steps = Array.from(document.querySelectorAll('.step'));
+let currentStep = 0;
+let totalAmount = 0;
+
+function showStep(index){
+  steps.forEach((s,i)=> s.classList.toggle('active', i===index));
+  currentStep = index;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function isNotEmpty(el){ return el && el.value && el.value.trim() !== ''; }
+
+function validateMainPerson(){
+  const mainName = document.getElementById('main_name');
+  const mainInsta = document.getElementById('main_instagram');
+  const mainMobile = document.getElementById('main_mobile');
+  const mainEmail = document.getElementById('main_email');
+  const mainGender = document.getElementById('main_gender');
+  if(!isNotEmpty(mainName) || !isNotEmpty(mainInsta) || !isNotEmpty(mainMobile) || !isNotEmpty(mainEmail) || !isNotEmpty(mainGender)) return false;
+  const mobile = mainMobile.value.replace(/\D/g,'');
+  if(mobile.length < 10) return false;
+  return true;
+}
+
+/* ---------- GUEST HANDLING ---------- */
+function generateGuestFields(){
+  const num = parseInt(document.getElementById('numPeople').value) || 1;
+  const container = document.getElementById('peopleContainer');
+  container.innerHTML = '';
+  if(num <= 1){ calculateAndShow(); return; }
+  for(let i=2;i<=num;i++){
+    const wrap = document.createElement('div');
+    wrap.className = 'person-fields';
+    wrap.innerHTML = `
+      <h4>Guest ${i}</h4>
+      <input class="input guest-name" placeholder="Full name" required />
+      <input class="input guest-insta" placeholder="Instagram link or handle" required />
+      <select class="input guest-gender" required>
+        <option value="">Select gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    `;
+    container.appendChild(wrap);
+  }
+  attachGuestListeners();
+  calculateAndShow();
+}
+
+function attachGuestListeners(){
+  const container = document.getElementById('peopleContainer');
+  container.querySelectorAll('select.guest-gender').forEach(sel=>{
+    sel.removeEventListener('change', calculateAndShow);
+    sel.addEventListener('change', calculateAndShow);
+  });
+  container.querySelectorAll('input.guest-name, input.guest-insta').forEach(inp=>{
+    inp.addEventListener('input', ()=>{});
+  });
+}
+
+function validateGuests(){
+  const num = parseInt(document.getElementById('numPeople').value) || 1;
+  if(num <= 1) return true;
+  const container = document.getElementById('peopleContainer');
+  const names = container.querySelectorAll('input.guest-name');
+  const instas = container.querySelectorAll('input.guest-insta');
+  const genders = container.querySelectorAll('select.guest-gender');
+  for(let i=0;i<names.length;i++){
+    if(!isNotEmpty(names[i]) || !isNotEmpty(instas[i]) || !isNotEmpty(genders[i])) return false;
+  }
+  return true;
+}
+
+/* ---------- TOTAL CALC ---------- */
+function calculateTotals(){
+  let males = 0, females = 0;
+  const mainGender = document.getElementById('main_gender').value;
+  if(mainGender==='Male') males++;
+  else if(mainGender==='Female') females++;
+  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
+    const v = sel.value;
+    if(v==='Male') males++;
+    else if(v==='Female') females++;
+  });
+  const couples = Math.min(males, females);
+  const remainingMales = males - couples;
+  const remainingFemales = females - couples;
+  const total = (couples*2500) + (remainingMales*2000) + (remainingFemales*1500);
+  return { couples, remainingMales, remainingFemales, total, males, females };
+}
+
+function calculateAndShow(){
+  const res = calculateTotals();
+  totalAmount = res.total;
+  document.getElementById('calcSummary').textContent = `💰 Total: ₹${res.total} • Couples: ${res.couples}, Males: ${res.remainingMales}, Females: ${res.remainingFemales}`;
+  document.getElementById('finalBreakdown').textContent = `💰 Total Payment: ₹${res.total} — Couples: ${res.couples}, Single Males: ${res.remainingMales}, Single Females: ${res.remainingFemales}`;
+}
+
+/* ---------- STEP NAVIGATION ---------- */
+document.getElementById('toStep2').addEventListener('click', ()=>{
+  if(!validateMainPerson()){ alert('Please complete main person details correctly.'); return; }
+  showStep(1);
+});
+document.getElementById('backTo1').addEventListener('click', ()=>showStep(0));
+document.getElementById('toStep3').addEventListener('click', ()=>{
+  const n = parseInt(document.getElementById('numPeople').value);
+  if(!n || n<1){ alert('Enter total people at least 1'); return; }
+  generateGuestFields();
+  showStep(2);
+});
+document.getElementById('backTo2').addEventListener('click', ()=>showStep(1));
+document.getElementById('toStep4').addEventListener('click', ()=>{
+  if(!validateGuests()){ alert('Please fill all guest details'); return; }
+  calculateAndShow();
+  showStep(3);
+});
+document.getElementById('backTo3').addEventListener('click', ()=>showStep(2));
+document.getElementById('main_gender').addEventListener('change', calculateAndShow);
+
+/* ---------- MODAL & LOADING ---------- */
+function showLoading(show){
+  document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+}
+
+function showSuccessModal(){
+  document.getElementById('successModal').style.display = 'flex';
+}
+document.getElementById('closeModal').addEventListener('click', ()=>{
+  document.getElementById('successModal').style.display = 'none';
+});
+
+/* ---------- SUBMIT FORM ---------- */
+document.getElementById("diwaliForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
+  showLoading(true);
   const submitBtn = document.getElementById("submitBtn");
   submitBtn.disabled = true;
   submitBtn.textContent = "Submitting...";
@@ -299,12 +433,9 @@ document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
   const main_email = document.getElementById("main_email").value.trim();
   const main_gender = document.getElementById("main_gender").value.trim();
   const upiTxn = document.getElementById("upiTxn").value.trim();
-  const totals = calculateTotals();
-  const totalAmount = totals.total;
 
-  // Guests
   const guests = [];
-  document.querySelectorAll("#peopleContainer .person-fields").forEach((box) => {
+  document.querySelectorAll("#peopleContainer .person-fields").forEach(box=>{
     guests.push({
       name: box.querySelector(".guest-name")?.value.trim() || "",
       instagram: box.querySelector(".guest-insta")?.value.trim() || "",
@@ -312,58 +443,53 @@ document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
     });
   });
 
-  // Convert screenshot to Base64
-  const fileInput = document.getElementById("upiScreenshot");
+  // Screenshot to Base64
   let screenshotBase64 = "";
   let screenshotName = "";
-  if (fileInput.files.length > 0) {
+  const fileInput = document.getElementById("upiScreenshot");
+  if(fileInput.files.length>0){
     const file = fileInput.files[0];
     screenshotName = file.name;
-    screenshotBase64 = await new Promise((resolve, reject) => {
+    screenshotBase64 = await new Promise((resolve,reject)=>{
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = err => reject(err);
+      reader.onload = ()=>resolve(reader.result);
+      reader.onerror = err=>reject(err);
       reader.readAsDataURL(file);
     });
   }
 
-  const formData = {
-    main_name,
-    main_instagram,
-    main_mobile,
-    main_email,
-    main_gender,
-    totalAmount,
-    upiTxn,
-    guests,
-    screenshotName,
-    screenshotBase64
-  };
+  const formData = { main_name, main_instagram, main_mobile, main_email, main_gender, totalAmount, upiTxn, guests, screenshotName, screenshotBase64 };
 
-  try {
-    await fetch(
-      "YOUR_APPS_SCRIPT_WEBAPP_URL", // replace with your Apps Script URL
-      {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      }
-    );
+  try{
+    const response = await fetch("https://script.google.com/macros/s/AKfycbzIN2t42cp093VFzkM_UUhF2b8xbMYCsrQwWEQh4fG2-TfUskIgBdTnqgmGeof1TRiwrQ/exec", { // replace with your Apps Script URL
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(formData)
+    });
+    const result = await response.json();
 
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit ✅";
-    showSuccessModal(); // fancy modal popup
-    e.target.reset();
-    showStep(0);
-    calculateAndShow(); // reset totals
-  } catch (err) {
-    alert("⚠️ Error submitting form. Please try again!");
+    if(result.status==="success"){
+      showSuccessModal();
+      e.target.reset();
+      showStep(0);
+      calculateAndShow();
+    } else {
+      alert("⚠️ Submission failed: " + result.message);
+    }
+
+  } catch(err){
     console.error(err);
+    alert("⚠️ Error submitting form. Please try again.");
+  } finally{
+    showLoading(false);
     submitBtn.disabled = false;
     submitBtn.textContent = "Submit ✅";
   }
 });
+
+/* ---------- INITIAL CALC ---------- */
+calculateAndShow();
+</script>
 
 
 
@@ -412,20 +538,104 @@ calculateAndShow();
 </div>
 
 <!-- Success Modal -->
-<div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;justify-content:center;align-items:center;">
-  <div style="background:#fff; padding:28px 32px; border-radius:12px; max-width:360px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.2); font-family:Inter,Arial,sans-serif;">
-    <h2 style="color:#b89263; margin-bottom:12px;">✅ Registration Successful!</h2>
-    <p style="color:#4b4036; margin-bottom:20px;">Thank you for registering. We'll contact you with confirmation.</p>
-    <button id="closeModal" style="padding:10px 20px; background:#d8b384; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Close</button>
+<div id="successModal" class="modal">
+  <div class="modal-content">
+    <h2>✅ Registration Successful!</h2>
+    <p>Thank you for registering. We'll contact you with confirmation.</p>
+    <button id="closeModal">Close</button>
   </div>
 </div>
 
 <style>
-@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+/* Modal overlay */
+.modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+/* Show modal */
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* Modal content */
+.modal-content {
+  background: #fff;
+  padding: 28px 32px;
+  border-radius: 14px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+  font-family: Inter, Arial, sans-serif;
+  transform: translateY(-20px);
+  transition: transform 0.35s ease;
+}
+
+/* Animate content on show */
+.modal.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-content h2 {
+  color: #b89263;
+  margin-bottom: 12px;
+}
+
+.modal-content p {
+  color: #4b4036;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.modal-content button {
+  padding: 10px 20px;
+  background: #d8b384;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.modal-content button:hover {
+  background: #b89263;
+}
 </style>
+
+<script>
+function showSuccessModal(){
+  const modal = document.getElementById('successModal');
+  modal.classList.add('show');
+
+  // Close on button click
+  document.getElementById('closeModal').onclick = () => {
+    modal.classList.remove('show');
+    setTimeout(()=> modal.style.display='none', 350); // hide after animation
+  }
+
+  // Optional: close when clicking outside modal content
+  modal.onclick = (e) => {
+    if(e.target === modal){
+      modal.classList.remove('show');
+      setTimeout(()=> modal.style.display='none', 350);
+    }
+  }
+}
+</script>
+
 
 </body>
 </html>
+
 
 
 
