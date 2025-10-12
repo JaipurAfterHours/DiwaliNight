@@ -216,7 +216,7 @@ document.getElementById('diwaliForm').onsubmit=async (e)=>{
     let base64=reader.result;
     document.getElementById('loadingOverlay').style.display='flex';
     try {
-  const res = await fetch("YOUR_APPS_SCRIPT_EXEC_URL", {
+  const res = await fetch("https://script.google.com/macros/s/AKfycbx3-QYImVQGlTdY6J9Plhr72_l-a2t03E3PUx_ZvnZRk4vUsS4ITwqmwFYBqNLEvLKi/exec", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -251,4 +251,5 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
