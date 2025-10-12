@@ -289,19 +289,20 @@ document.getElementById('numPeople').addEventListener('input', ()=>{/* no auto-g
 document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Collect main person data
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
   const main_name = document.getElementById("main_name").value.trim();
   const main_instagram = document.getElementById("main_instagram").value.trim();
   const main_mobile = document.getElementById("main_mobile").value.trim();
   const main_email = document.getElementById("main_email").value.trim();
   const main_gender = document.getElementById("main_gender").value.trim();
   const upiTxn = document.getElementById("upiTxn").value.trim();
-
-  // Calculate total
   const totals = calculateTotals();
   const totalAmount = totals.total;
 
-  // Collect guest data
+  // Guests
   const guests = [];
   document.querySelectorAll("#peopleContainer .person-fields").forEach((box) => {
     guests.push({
@@ -311,11 +312,22 @@ document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
     });
   });
 
-  // Screenshot file
-  const screenshotFile = document.getElementById("upiScreenshot").files[0];
+  // Convert screenshot to Base64
+  const fileInput = document.getElementById("upiScreenshot");
+  let screenshotBase64 = "";
+  let screenshotName = "";
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    screenshotName = file.name;
+    screenshotBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = err => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
 
-  // Prepare form data
-  const mainFormData = {
+  const formData = {
     main_name,
     main_instagram,
     main_mobile,
@@ -324,46 +336,35 @@ document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
     totalAmount,
     upiTxn,
     guests,
-    timestamp: new Date().toLocaleString()
+    screenshotName,
+    screenshotBase64
   };
 
-  const formData = new FormData();
-  formData.append("data", JSON.stringify(mainFormData));
+  try {
+    await fetch(
+      "YOUR_APPS_SCRIPT_WEBAPP_URL", // replace with your Apps Script URL
+      {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      }
+    );
 
-  if (screenshotFile) {
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(",")[1]; // remove prefix
-      formData.append("file", base64Image);
-      formData.append("filename", screenshotFile.name);
-      formData.append("mimetype", screenshotFile.type);
-
-      await sendToAppsScript(formData);
-    };
-    reader.readAsDataURL(screenshotFile);
-  } else {
-    await sendToAppsScript(formData);
-  }
-
-  async function sendToAppsScript(fd) {
-    try {
-      await fetch(
-        "https://script.google.com/macros/s/AKfycbzIN2t42cp093VFzkM_UUhF2b8xbMYCsrQwWEQh4fG2-TfUskIgBdTnqgmGeof1TRiwrQ/exec", // replace with your URL
-        {
-          method: "POST",
-          body: fd
-        }
-      );
-
-      document.getElementById("successMsg").style.display = "block";
-      e.target.reset();
-      showStep(0);
-    } catch (err) {
-      alert("⚠️ Error submitting form. Please try again!");
-      console.error(err);
-    }
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit ✅";
+    showSuccessModal(); // fancy modal popup
+    e.target.reset();
+    showStep(0);
+    calculateAndShow(); // reset totals
+  } catch (err) {
+    alert("⚠️ Error submitting form. Please try again!");
+    console.error(err);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit ✅";
   }
 });
+
 
 
 /* collect submission data */
@@ -404,8 +405,28 @@ function collectSubmissionData(){
 /* initial calc to show main only if gender selected */
 calculateAndShow();
 </script>
+
+<!-- Loading Spinner -->
+<div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;justify-content:center;align-items:center;">
+  <div style="width:60px;height:60px;border:6px solid #f3f3f3;border-top:6px solid #d8b384;border-radius:50%;animation:spin 1s linear infinite;"></div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000;justify-content:center;align-items:center;">
+  <div style="background:#fff; padding:28px 32px; border-radius:12px; max-width:360px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.2); font-family:Inter,Arial,sans-serif;">
+    <h2 style="color:#b89263; margin-bottom:12px;">✅ Registration Successful!</h2>
+    <p style="color:#4b4036; margin-bottom:20px;">Thank you for registering. We'll contact you with confirmation.</p>
+    <button id="closeModal" style="padding:10px 20px; background:#d8b384; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Close</button>
+  </div>
+</div>
+
+<style>
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+</style>
+
 </body>
 </html>
+
 
 
 
