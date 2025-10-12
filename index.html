@@ -215,31 +215,33 @@ document.getElementById('diwaliForm').onsubmit=async (e)=>{
   reader.onload=async function(){
     let base64=reader.result;
     document.getElementById('loadingOverlay').style.display='flex';
-    try{
-      const res=await fetch('/api/submit',{
-        method:'POST',
-        body:JSON.stringify({
-          main_name,main_instagram,main_mobile,main_email,main_gender,
-          upiTxn,totalAmount,screenshotBase64:base64,screenshotName:screenshotFile.name,
-          guests:guestData
-        }),
-        headers:{'Content-Type':'application/json'}
-      });
-      const data=await res.json();
-      document.getElementById('loadingOverlay').style.display='none';
-      if(data.status==='success'){
-        document.getElementById('diwaliForm').reset();
-        document.getElementById('guestsContainer').innerHTML='';
-        document.getElementById('totalAmount').innerText='₹0';
-        step=1; showStep();
-        showModal();
-      }else{
-        alert('Error: '+data.message);
-      }
-    }catch(err){
-      document.getElementById('loadingOverlay').style.display='none';
-      alert('Submission failed: '+err.message);
-    }
+    try {
+  const res = await fetch("YOUR_APPS_SCRIPT_EXEC_URL", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      main_name,
+      main_instagram,
+      main_mobile,
+      main_email,
+      main_gender,
+      totalAmount,
+      upiTxn,
+      screenshotBase64: base64,
+      screenshotName: screenshotFile.name,
+      guests: guestData
+    })
+  });
+  
+  const data = await res.json();
+  if (data.status === "success") {
+    // Success
+  } else {
+    alert("Error: " + data.message);
+  }
+} catch (err) {
+  alert("Submission failed: " + err.message);
+}
   };
   reader.readAsDataURL(screenshotFile);
 };
@@ -249,3 +251,4 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
