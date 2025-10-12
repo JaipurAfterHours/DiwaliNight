@@ -213,43 +213,40 @@ document.getElementById('diwaliForm').onsubmit=async (e)=>{
   if(!screenshotFile){ alert('Please upload payment screenshot'); return; }
   let reader=new FileReader();
   reader.onload = async function() {
-  const base64Screenshot = reader.result; // full base64 string
-  document.getElementById('loadingOverlay').style.display = 'flex';
+  const base64 = reader.result;
 
+  document.getElementById('loadingOverlay').style.display='flex';
   try {
     const res = await fetch("/api/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        main_name,
-        main_instagram,
-        main_mobile,
-        main_email,
-        main_gender,
-        upiTxn,
-        totalAmount,
-        guests: guestData,
-        screenshotBase64: base64Screenshot,
+        main_name, main_instagram, main_mobile, main_email, main_gender,
+        upiTxn, totalAmount, guests: guestData,
+        screenshotBase64: base64,
         screenshotName: screenshotFile.name
       })
     });
 
     const data = await res.json();
-    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('loadingOverlay').style.display='none';
+
     if (data.status === 'success') {
       document.getElementById('diwaliForm').reset();
       guests = [];
-      document.getElementById('guestsContainer').innerHTML = '';
-      document.getElementById('totalAmount').innerText = '₹0';
+      document.getElementById('guestsContainer').innerHTML='';
+      document.getElementById('totalAmount').innerText='₹0';
       showModal();
     } else {
-      alert('Error: ' + data.message);
+      alert('Error: '+data.message || 'Submission failed');
     }
-  } catch (err) {
-    document.getElementById('loadingOverlay').style.display = 'none';
-    alert('Submission failed: ' + err.message);
+
+  } catch(err) {
+    document.getElementById('loadingOverlay').style.display='none';
+    alert('Submission failed: '+err.message);
   }
 };
+
 
 reader.readAsDataURL(screenshotFile);
 };
@@ -259,6 +256,7 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
 
 
