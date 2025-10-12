@@ -252,8 +252,8 @@ document.getElementById('diwaliForm').onsubmit = async (e)=>{
   });
 
   // Screenshot
-  let screenshotFile = document.getElementById('screenshot').files[0];
-  if(!screenshotFile){ alert('Please upload payment screenshot'); return; }
+  // let screenshotFile = document.getElementById('screenshot').files[0];
+  // if(!screenshotFile){ alert('Please upload payment screenshot'); return; }
   let reader = new FileReader();
   reader.onload = async function(){
     let base64 = reader.result;
@@ -264,8 +264,8 @@ document.getElementById('diwaliForm').onsubmit = async (e)=>{
         body: JSON.stringify({
           main_name, main_instagram, main_mobile, main_email, main_gender,
           upiTxn, totalAmount,
-          screenshotBase64: base64,
-          screenshotName: screenshotFile.name,
+          // screenshotBase64: base64,
+          // screenshotName: screenshotFile.name,
           guests: guestData
         }),
         headers:{ 'Content-Type':'application/json' }
@@ -294,5 +294,6 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
 
