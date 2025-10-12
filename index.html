@@ -49,6 +49,19 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
 .sparkle span{ position:absolute; width:6px; height:6px; background:var(--sparkle); border-radius:50%; animation:spark 3s infinite ease-in-out; opacity:0; }
 @keyframes spark{ 0%,100%{ opacity:0; transform:translateY(0) scale(.8) } 50%{ opacity:1; transform:translateY(-8px) scale(1.2) } }
 @media (max-width:560px){ header h1{ font-size:1.8rem } .input, select, .person-fields{ width:94% } .detail-pill{ flex:1 } }
+
+#loadingOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;justify-content:center;align-items:center;}
+#loadingOverlay div{width:60px;height:60px;border:6px solid #f3f3f3;border-top:6px solid #d8b384;border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+.modal {display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000; justify-content:center; align-items:center; opacity:0; transition: opacity 0.35s ease;}
+.modal.show{display:flex; opacity:1;}
+.modal-content{ background:#fff; padding:28px 32px; border-radius:14px; max-width:360px; width:90%; text-align:center; box-shadow:0 10px 28px rgba(0,0,0,0.25); font-family:Inter,Arial,sans-serif; transform:translateY(-20px); transition:transform 0.35s ease;}
+.modal.show .modal-content{transform:translateY(0);}
+.modal-content h2{color:#b89263; margin-bottom:12px;}
+.modal-content p{color:#4b4036; margin-bottom:20px; font-size:1rem;}
+.modal-content button{padding:10px 20px; background:#d8b384; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:background 0.2s;}
+.modal-content button:hover{background:#b89263;}
 </style>
 </head>
 <body>
@@ -76,7 +89,7 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
         <div class="detail-pill">💑 Couple • ₹2500</div>
       </div>
     </div>
-    <div style="margin-top:12px" class="note">NTOE : On-spot charges may differ.</div>
+    <div style="margin-top:12px" class="note">NOTE: On-spot charges may differ.</div>
   </div>
 
   <form id="diwaliForm" novalidate>
@@ -84,560 +97,195 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
     <div class="step active" id="step1">
       <h2>Main Person</h2>
       <input class="input" id="main_name" placeholder="Full name" required>
-      <input class="input" id="main_instagram" placeholder="Instagram link (handle or full url)" required>
-      <input class="input" id="main_mobile" placeholder="Mobile number" inputmode="tel" pattern="[0-9]{10}" required>
-      <input class="input" id="main_email" placeholder="Email address" type="email" required>
+      <input class="input" id="main_instagram" placeholder="Instagram handle" required>
+      <input class="input" id="main_mobile" placeholder="Mobile number" required>
+      <input class="input" id="main_email" placeholder="Email" type="email" required>
       <select class="input" id="main_gender" required>
         <option value="">Select gender</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
       </select>
       <div class="controls">
-        <button type="button" class="btn" id="toStep2">Next ➡️</button>
+        <button type="button" class="btn" id="next1">Next</button>
       </div>
-      <div class="small">All fields are required.</div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- STEP 2: Guests -->
     <div class="step" id="step2">
-      <h2>How many people (including you)?</h2>
-      <input class="input" id="numPeople" type="number" min="1" value="1" required>
+      <h2>Guests</h2>
+      <div id="guestsContainer"></div>
       <div class="controls">
-        <button type="button" class="btn secondary" id="backTo1">⬅️ Back</button>
-        <button type="button" class="btn" id="toStep3">Next ➡️</button>
+        <button type="button" class="btn secondary" id="addGuest">Add Guest</button>
       </div>
-      <div class="small">Enter total attendees including the main person.</div>
+      <div class="controls">
+        <button type="button" class="btn secondary" id="back2">Back</button>
+        <button type="button" class="btn" id="next2">Next</button>
+      </div>
     </div>
 
-    <!-- STEP 3 -->
+    <!-- STEP 3: Payment -->
     <div class="step" id="step3">
-      <h2>Guest Details</h2>
-      <div id="peopleContainer" aria-live="polite"></div>
-      <div class="summary" id="calcSummary">💰 Total Payment: ₹0</div>
+      <h2>Payment</h2>
+      <p class="small">Scan QR or UPI and upload screenshot.</p>
+      <input type="file" accept="image/*" id="screenshot" required>
+      <input class="input" id="upiTxn" placeholder="UPI Transaction ID" required>
+      <div class="summary">Total Amount: <span id="totalAmount">₹0</span></div>
       <div class="controls">
-        <button type="button" class="btn secondary" id="backTo2">⬅️ Back</button>
-        <button type="button" class="btn" id="toStep4">Next ➡️</button>
+        <button type="button" class="btn secondary" id="back3">Back</button>
+        <button type="submit" class="btn" id="submitBtn">Submit</button>
       </div>
-      <div class="small">All guest fields (name, instagram, gender) are required if you added guests.</div>
-    </div>
-
-    <!-- STEP 4 -->
-    <div class="step" id="step4">
-      <h2>Payment & Confirmation</h2>
-      <div class="summary" id="finalBreakdown">💰 Total Payment: ₹0</div>
-      <p class="small">Please scan the UPI QR and upload payment screenshot with transaction ID.</p>
-      <img id="qr" src="Diwali Party QR Code.jpg" alt="UPI QR code (replace image file)" />
-      <input class="input" id="upiTxn" placeholder="UPI Transaction ID (e.g. TXN12345)" required>
-      <input class="input" id="upiScreenshot" type="file" accept="image/*" required>
-      <div class="controls">
-        <button type="button" class="btn secondary" id="backTo3">⬅️ Back</button>
-        <button type="submit" class="btn" id="submitBtn">Submit ✅</button>
-      </div>
-      <div class="note" style="margin-top:10px">We will verify payment manually. Keep the transaction ID safe.</div>
     </div>
   </form>
 
-  <div id="successMsg">✅ Registration received — thank you! We'll contact you with confirmation.</div>
-</div>
+  <div id="loadingOverlay"><div></div></div>
 
-<script>
-/* ---------- state & helpers ---------- */
-const steps = Array.from(document.querySelectorAll('.step'));
-let currentStep = 0;
-let totalAmount = 0;
-
-function showStep(index){
-  steps.forEach((s,i)=> s.classList.toggle('active', i===index));
-  currentStep = index;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* validation helpers */
-function isNotEmpty(el){ return el && el.value && el.value.trim() !== ''; }
-function validateMainPerson(){
-  const mainName = document.getElementById('main_name');
-  const mainInsta = document.getElementById('main_instagram');
-  const mainMobile = document.getElementById('main_mobile');
-  const mainEmail = document.getElementById('main_email');
-  const mainGender = document.getElementById('main_gender');
-  if(!isNotEmpty(mainName) || !isNotEmpty(mainInsta) || !isNotEmpty(mainMobile) || !isNotEmpty(mainEmail) || !isNotEmpty(mainGender)) return false;
-  const mobile = mainMobile.value.replace(/\D/g,'');
-  if(mobile.length < 10) return false;
-  return true;
-}
-
-/* generate guest fields */
-function generateGuestFields(){
-  const num = parseInt(document.getElementById('numPeople').value) || 1;
-  const container = document.getElementById('peopleContainer');
-  container.innerHTML = '';
-
-  if(num <= 1){
-    calculateAndShow(); // no additional guests
-    return;
-  }
-
-  for(let i=2;i<=num;i++){
-    const wrap = document.createElement('div');
-    wrap.className = 'person-fields';
-    wrap.innerHTML = `
-      <h4>Guest ${i}</h4>
-      <input class="input guest-name" placeholder="Full name" required />
-      <input class="input guest-insta" placeholder="Instagram link or handle" required />
-      <select class="input guest-gender" required>
-        <option value="">Select gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-    `;
-    container.appendChild(wrap);
-  }
-
-  attachGuestListeners();
-  calculateAndShow();
-}
-
-/* attach listeners to dynamically created guest fields */
-function attachGuestListeners(){
-  const container = document.getElementById('peopleContainer');
-  // listen for change on all guest gender selects
-  container.querySelectorAll('select.guest-gender').forEach(sel=>{
-    sel.removeEventListener('change', calculateAndShow);
-    sel.addEventListener('change', calculateAndShow);
-  });
-  // when guest name/insta change, no need to recalc totals but keep them required
-  container.querySelectorAll('input.guest-name, input.guest-insta').forEach(inp=>{
-    inp.addEventListener('input', ()=>{/* nothing but ensures required attribute works */});
-  });
-}
-
-/* calculate couples & total */
-function calculateTotals(){
-  let males = 0, females = 0;
-  const mainGender = document.getElementById('main_gender').value;
-  if(mainGender === 'Male') males++;
-  else if(mainGender === 'Female') females++;
-
-  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
-    const v = sel.value;
-    if(v === 'Male') males++;
-    else if(v === 'Female') females++;
-  });
-
-  const couples = Math.min(males, females);
-  const remainingMales = males - couples;
-  const remainingFemales = females - couples;
-  const total = (couples * 2500) + (remainingMales * 2000) + (remainingFemales * 1500);
-
-  return { couples, remainingMales, remainingFemales, total, males, females };
-}
-
-/* update UI summary */
-function calculateAndShow(){
-  const res = calculateTotals();
-  totalAmount = res.total;
-  const summaryEl = document.getElementById('calcSummary');
-  const finalEl = document.getElementById('finalBreakdown');
-  summaryEl.textContent = `💰 Total: ₹${res.total} • Couples: ${res.couples}, Males: ${res.remainingMales}, Females: ${res.remainingFemales}`;
-  finalEl.textContent = `💰 Total Payment: ₹${res.total} — Couples: ${res.couples}, Single Males: ${res.remainingMales}, Single Females: ${res.remainingFemales}`;
-}
-
-/* validate guest fields */
-function validateGuests(){
-  const num = parseInt(document.getElementById('numPeople').value) || 1;
-  if(num <= 1) return true;
-  const container = document.getElementById('peopleContainer');
-  const names = container.querySelectorAll('input.guest-name');
-  const instas = container.querySelectorAll('input.guest-insta');
-  const genders = container.querySelectorAll('select.guest-gender');
-  for(let i=0;i<names.length;i++){
-    if(!isNotEmpty(names[i]) || !isNotEmpty(instas[i]) || !isNotEmpty(genders[i])) return false;
-  }
-  return true;
-}
-
-/* navigation wiring */
-document.getElementById('toStep2').addEventListener('click', ()=>{
-  if(!validateMainPerson()){
-    alert('Please complete main person details correctly (all fields required, valid mobile/email).');
-    return;
-  }
-  showStep(1);
-});
-
-document.getElementById('backTo1').addEventListener('click', ()=> showStep(0));
-document.getElementById('toStep3').addEventListener('click', ()=>{
-  const n = parseInt(document.getElementById('numPeople').value);
-  if(!n || n < 1){ alert('Please enter total number of people (at least 1).'); return; }
-  generateGuestFields();
-  showStep(2);
-});
-document.getElementById('backTo2').addEventListener('click', ()=> showStep(1));
-document.getElementById('toStep4').addEventListener('click', ()=>{
-  if(!validateGuests()){ alert('Please fill all guest details (name, instagram, gender).'); return; }
-  calculateAndShow();
-  showStep(3);
-});
-document.getElementById('backTo3').addEventListener('click', ()=> showStep(2));
-
-/* recalc when main gender or numPeople changes */
-document.getElementById('main_gender').addEventListener('change', calculateAndShow);
-document.getElementById('numPeople').addEventListener('input', ()=>{/* no auto-generate until next pressed */});
-
-/* submit handler */
-/* ---------- HELPER FUNCTIONS ---------- */
-const steps = Array.from(document.querySelectorAll('.step'));
-let currentStep = 0;
-let totalAmount = 0;
-
-function showStep(index){
-  steps.forEach((s,i)=> s.classList.toggle('active', i===index));
-  currentStep = index;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function isNotEmpty(el){ return el && el.value && el.value.trim() !== ''; }
-
-function validateMainPerson(){
-  const mainName = document.getElementById('main_name');
-  const mainInsta = document.getElementById('main_instagram');
-  const mainMobile = document.getElementById('main_mobile');
-  const mainEmail = document.getElementById('main_email');
-  const mainGender = document.getElementById('main_gender');
-  if(!isNotEmpty(mainName) || !isNotEmpty(mainInsta) || !isNotEmpty(mainMobile) || !isNotEmpty(mainEmail) || !isNotEmpty(mainGender)) return false;
-  const mobile = mainMobile.value.replace(/\D/g,'');
-  if(mobile.length < 10) return false;
-  return true;
-}
-
-/* ---------- GUEST HANDLING ---------- */
-function generateGuestFields(){
-  const num = parseInt(document.getElementById('numPeople').value) || 1;
-  const container = document.getElementById('peopleContainer');
-  container.innerHTML = '';
-  if(num <= 1){ calculateAndShow(); return; }
-  for(let i=2;i<=num;i++){
-    const wrap = document.createElement('div');
-    wrap.className = 'person-fields';
-    wrap.innerHTML = `
-      <h4>Guest ${i}</h4>
-      <input class="input guest-name" placeholder="Full name" required />
-      <input class="input guest-insta" placeholder="Instagram link or handle" required />
-      <select class="input guest-gender" required>
-        <option value="">Select gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-    `;
-    container.appendChild(wrap);
-  }
-  attachGuestListeners();
-  calculateAndShow();
-}
-
-function attachGuestListeners(){
-  const container = document.getElementById('peopleContainer');
-  container.querySelectorAll('select.guest-gender').forEach(sel=>{
-    sel.removeEventListener('change', calculateAndShow);
-    sel.addEventListener('change', calculateAndShow);
-  });
-  container.querySelectorAll('input.guest-name, input.guest-insta').forEach(inp=>{
-    inp.addEventListener('input', ()=>{});
-  });
-}
-
-function validateGuests(){
-  const num = parseInt(document.getElementById('numPeople').value) || 1;
-  if(num <= 1) return true;
-  const container = document.getElementById('peopleContainer');
-  const names = container.querySelectorAll('input.guest-name');
-  const instas = container.querySelectorAll('input.guest-insta');
-  const genders = container.querySelectorAll('select.guest-gender');
-  for(let i=0;i<names.length;i++){
-    if(!isNotEmpty(names[i]) || !isNotEmpty(instas[i]) || !isNotEmpty(genders[i])) return false;
-  }
-  return true;
-}
-
-/* ---------- TOTAL CALC ---------- */
-function calculateTotals(){
-  let males = 0, females = 0;
-  const mainGender = document.getElementById('main_gender').value;
-  if(mainGender==='Male') males++;
-  else if(mainGender==='Female') females++;
-  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
-    const v = sel.value;
-    if(v==='Male') males++;
-    else if(v==='Female') females++;
-  });
-  const couples = Math.min(males, females);
-  const remainingMales = males - couples;
-  const remainingFemales = females - couples;
-  const total = (couples*2500) + (remainingMales*2000) + (remainingFemales*1500);
-  return { couples, remainingMales, remainingFemales, total, males, females };
-}
-
-function calculateAndShow(){
-  const res = calculateTotals();
-  totalAmount = res.total;
-  document.getElementById('calcSummary').textContent = `💰 Total: ₹${res.total} • Couples: ${res.couples}, Males: ${res.remainingMales}, Females: ${res.remainingFemales}`;
-  document.getElementById('finalBreakdown').textContent = `💰 Total Payment: ₹${res.total} — Couples: ${res.couples}, Single Males: ${res.remainingMales}, Single Females: ${res.remainingFemales}`;
-}
-
-/* ---------- STEP NAVIGATION ---------- */
-document.getElementById('toStep2').addEventListener('click', ()=>{
-  if(!validateMainPerson()){ alert('Please complete main person details correctly.'); return; }
-  showStep(1);
-});
-document.getElementById('backTo1').addEventListener('click', ()=>showStep(0));
-document.getElementById('toStep3').addEventListener('click', ()=>{
-  const n = parseInt(document.getElementById('numPeople').value);
-  if(!n || n<1){ alert('Enter total people at least 1'); return; }
-  generateGuestFields();
-  showStep(2);
-});
-document.getElementById('backTo2').addEventListener('click', ()=>showStep(1));
-document.getElementById('toStep4').addEventListener('click', ()=>{
-  if(!validateGuests()){ alert('Please fill all guest details'); return; }
-  calculateAndShow();
-  showStep(3);
-});
-document.getElementById('backTo3').addEventListener('click', ()=>showStep(2));
-document.getElementById('main_gender').addEventListener('change', calculateAndShow);
-
-/* ---------- MODAL & LOADING ---------- */
-function showLoading(show){
-  document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-}
-
-function showSuccessModal(){
-  document.getElementById('successModal').style.display = 'flex';
-}
-document.getElementById('closeModal').addEventListener('click', ()=>{
-  document.getElementById('successModal').style.display = 'none';
-});
-
-/* ---------- SUBMIT FORM ---------- */
-document.getElementById("diwaliForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-
-  showLoading(true);
-  const submitBtn = document.getElementById("submitBtn");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
-
-  const main_name = document.getElementById("main_name").value.trim();
-  const main_instagram = document.getElementById("main_instagram").value.trim();
-  const main_mobile = document.getElementById("main_mobile").value.trim();
-  const main_email = document.getElementById("main_email").value.trim();
-  const main_gender = document.getElementById("main_gender").value.trim();
-  const upiTxn = document.getElementById("upiTxn").value.trim();
-
-  const guests = [];
-  document.querySelectorAll("#peopleContainer .person-fields").forEach(box=>{
-    guests.push({
-      name: box.querySelector(".guest-name")?.value.trim() || "",
-      instagram: box.querySelector(".guest-insta")?.value.trim() || "",
-      gender: box.querySelector(".guest-gender")?.value.trim() || ""
-    });
-  });
-
-  // Screenshot to Base64
-  let screenshotBase64 = "";
-  let screenshotName = "";
-  const fileInput = document.getElementById("upiScreenshot");
-  if(fileInput.files.length>0){
-    const file = fileInput.files[0];
-    screenshotName = file.name;
-    screenshotBase64 = await new Promise((resolve,reject)=>{
-      const reader = new FileReader();
-      reader.onload = ()=>resolve(reader.result);
-      reader.onerror = err=>reject(err);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  const formData = { main_name, main_instagram, main_mobile, main_email, main_gender, totalAmount, upiTxn, guests, screenshotName, screenshotBase64 };
-
-  try{
-    const response = await fetch("https://script.google.com/macros/s/AKfycbzIN2t42cp093VFzkM_UUhF2b8xbMYCsrQwWEQh4fG2-TfUskIgBdTnqgmGeof1TRiwrQ/exec", { // replace with your Apps Script URL
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(formData)
-    });
-    const result = await response.json();
-
-    if(result.status==="success"){
-      showSuccessModal();
-      e.target.reset();
-      showStep(0);
-      calculateAndShow();
-    } else {
-      alert("⚠️ Submission failed: " + result.message);
-    }
-
-  } catch(err){
-    console.error(err);
-    alert("⚠️ Error submitting form. Please try again.");
-  } finally{
-    showLoading(false);
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit ✅";
-  }
-});
-
-/* ---------- INITIAL CALC ---------- */
-calculateAndShow();
-
-
-
-
-/* collect submission data */
-function collectSubmissionData(){
-  const main = {
-    name: document.getElementById('main_name').value.trim(),
-    instagram: document.getElementById('main_instagram').value.trim(),
-    mobile: document.getElementById('main_mobile').value.trim(),
-    email: document.getElementById('main_email').value.trim(),
-    gender: document.getElementById('main_gender').value
-  };
-  const num = parseInt(document.getElementById('numPeople').value) || 1;
-  const guests = [];
-  document.querySelectorAll('#peopleContainer .person-fields').forEach((div, idx)=>{
-    const name = div.querySelector('input.guest-name').value.trim();
-    const insta = div.querySelector('input.guest-insta').value.trim();
-    const gender = div.querySelector('select.guest-gender').value;
-    guests.push({ name, insta, gender });
-  });
-  const totals = calculateTotals();
-  const upiTxn = document.getElementById('upiTxn') ? document.getElementById('upiTxn').value.trim() : '';
-  return { main, totalPeople: num, guests, totals, upiTxn };
-}
-
-/* sparkle generator */
-(function generateSparkles(){
-  const sparkle = document.querySelector('.sparkle');
-  if(!sparkle) return;
-  for(let i=0;i<22;i++){
-    const s = document.createElement('span');
-    s.style.left = (Math.random()*100)+'%';
-    s.style.top = (Math.random()*100)+'%';
-    s.style.animationDelay = (Math.random()*3)+'s';
-    sparkle.appendChild(s);
-  }
-})();
-
-/* initial calc to show main only if gender selected */
-calculateAndShow();
-</script>
-
-<!-- Loading Spinner -->
-<div id="loadingOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;justify-content:center;align-items:center;">
-  <div style="width:60px;height:60px;border:6px solid #f3f3f3;border-top:6px solid #d8b384;border-radius:50%;animation:spin 1s linear infinite;"></div>
-</div>
-
-<!-- Success Modal -->
-<div id="successModal" class="modal">
-  <div class="modal-content">
-    <h2>✅ Registration Successful!</h2>
-    <p>Thank you for registering. We'll contact you with confirmation.</p>
-    <button id="closeModal">Close</button>
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <h2>🎉 Registration Successful!</h2>
+      <p>See you at Diwali Night. Your registration has been recorded.</p>
+      <button onclick="closeModal()">Close</button>
+    </div>
   </div>
 </div>
 
-<style>
-/* Modal overlay */
-.modal {
-  display: none; /* hidden by default */
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 10000;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-}
-
-/* Show modal */
-.modal.show {
-  display: flex;
-  opacity: 1;
-}
-
-/* Modal content */
-.modal-content {
-  background: #fff;
-  padding: 28px 32px;
-  border-radius: 14px;
-  max-width: 360px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.25);
-  font-family: Inter, Arial, sans-serif;
-  transform: translateY(-20px);
-  transition: transform 0.35s ease;
-}
-
-/* Animate content on show */
-.modal.show .modal-content {
-  transform: translateY(0);
-}
-
-.modal-content h2 {
-  color: #b89263;
-  margin-bottom: 12px;
-}
-
-.modal-content p {
-  color: #4b4036;
-  margin-bottom: 20px;
-  font-size: 1rem;
-}
-
-.modal-content button {
-  padding: 10px 20px;
-  background: #d8b384;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-.modal-content button:hover {
-  background: #b89263;
-}
-</style>
-
 <script>
-function showSuccessModal(){
-  const modal = document.getElementById('successModal');
-  modal.classList.add('show');
+let guests = [];
+let step = 1;
 
-  // Close on button click
-  document.getElementById('closeModal').onclick = () => {
-    modal.classList.remove('show');
-    setTimeout(()=> modal.style.display='none', 350); // hide after animation
-  }
+function updateTotal() {
+  let mainGender = document.getElementById('main_gender').value;
+  let males = 0, females = 0;
 
-  // Optional: close when clicking outside modal content
-  modal.onclick = (e) => {
-    if(e.target === modal){
-      modal.classList.remove('show');
-      setTimeout(()=> modal.style.display='none', 350);
-    }
-  }
+  if (mainGender === 'Male') males++;
+  else if (mainGender === 'Female') females++;
+
+  // loop through guest fields dynamically
+  let guestElems = document.querySelectorAll('#guestsContainer .person-fields');
+  guestElems.forEach(g => {
+    let gender = g.querySelector('.guestGender').value;
+    if (gender === 'Male') males++;
+    else if (gender === 'Female') females++;
+  });
+
+  // calculate couples and remaining singles
+  let couples = Math.min(males, females);
+  let remainingMales = males - couples;
+  let remainingFemales = females - couples;
+
+  // calculate total amount
+  let total = (couples * 2500) + (remainingMales * 2000) + (remainingFemales * 1500);
+
+  // update UI
+  document.getElementById('totalAmount').innerText =
+    `💰 ₹${total} — Couples: ${couples}, Single Males: ${remainingMales}, Single Females: ${remainingFemales}`;
+
+  return total;
 }
+
+
+
+// Step navigation
+document.getElementById('next1').onclick = () => {
+  if(!document.getElementById('main_name').value || !document.getElementById('main_instagram').value || !document.getElementById('main_mobile').value || !document.getElementById('main_email').value || !document.getElementById('main_gender').value){
+    alert('Please fill all fields'); return;
+  }
+  step=2; showStep();
+  updateTotal();
+};
+document.getElementById('back2').onclick = ()=>{ step=1; showStep(); };
+document.getElementById('next2').onclick = ()=>{ step=3; showStep(); updateTotal(); };
+document.getElementById('back3').onclick = ()=>{ step=2; showStep(); };
+
+function showStep(){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+step).classList.add('active');
+}
+
+// Guest handling
+document.getElementById('addGuest').onclick = () => {
+  let container = document.getElementById('guestsContainer');
+  let div = document.createElement('div');
+  div.className='person-fields';
+  div.innerHTML = `
+    <h4>Guest</h4>
+    <input class="input guestName" placeholder="Full name" required>
+    <input class="input guestInstagram" placeholder="Instagram handle" required>
+    <select class="input guestGender" required>
+      <option value="">Select gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <button type="button" class="btn secondary removeGuest">Remove</button>
+  `;
+  container.appendChild(div);
+
+  div.querySelector('.removeGuest').onclick = ()=>{
+    div.remove();
+    updateTotal();
+  };
+};
+
+// Form submission
+document.getElementById('diwaliForm').onsubmit = async (e)=>{
+  e.preventDefault();
+  let main_name = document.getElementById('main_name').value;
+  let main_instagram = document.getElementById('main_instagram').value;
+  let main_mobile = document.getElementById('main_mobile').value;
+  let main_email = document.getElementById('main_email').value;
+  let main_gender = document.getElementById('main_gender').value;
+  let upiTxn = document.getElementById('upiTxn').value;
+  let totalAmount = updateTotal();
+
+  // Guests data
+  let guestElems = document.querySelectorAll('#guestsContainer .person-fields');
+  let guestData = [];
+  guestElems.forEach((g,i)=>{
+    let name = g.querySelector('.guestName').value;
+    let insta = g.querySelector('.guestInstagram').value;
+    let gender = g.querySelector('.guestGender').value;
+    if(name && insta && gender) guestData.push({name, instagram:insta, gender});
+  });
+
+  // Screenshot
+  let screenshotFile = document.getElementById('screenshot').files[0];
+  if(!screenshotFile){ alert('Please upload payment screenshot'); return; }
+  let reader = new FileReader();
+  reader.onload = async function(){
+    let base64 = reader.result;
+    document.getElementById('loadingOverlay').style.display='flex';
+    try{
+      const res = await fetch("https://script.google.com/macros/s/AKfycbwPiFoZvfFdcQZ3S4xWv58I9HdrBBfjlH4yy2AHAO0O8pCr0ZfBAWluSIcNIl5Fx9YFhg/exec", {  // <-- replace with your Apps Script Web App URL
+        method:'POST',
+        body: JSON.stringify({
+          main_name, main_instagram, main_mobile, main_email, main_gender,
+          upiTxn, totalAmount,
+          screenshotBase64: base64,
+          screenshotName: screenshotFile.name,
+          guests: guestData
+        }),
+        headers:{ 'Content-Type':'application/json' }
+      });
+      const data = await res.json();
+      document.getElementById('loadingOverlay').style.display='none';
+      if(data.status==='success'){
+        document.getElementById('diwaliForm').reset();
+        guests=[];
+        document.getElementById('guestsContainer').innerHTML='';
+        document.getElementById('totalAmount').innerText='₹0';
+        showModal();
+      }else{
+        alert('Error: '+data.message);
+      }
+    }catch(err){
+      document.getElementById('loadingOverlay').style.display='none';
+      alert('Submission failed: '+err.message);
+    }
+  };
+  reader.readAsDataURL(screenshotFile);
+};
+
+function showModal(){ document.getElementById('successModal').classList.add('show'); }
+function closeModal(){ document.getElementById('successModal').classList.remove('show'); }
 </script>
-
-
 </body>
 </html>
-
-
-
-
-
-
-
