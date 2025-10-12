@@ -217,7 +217,7 @@ document.getElementById('diwaliForm').onsubmit=async (e)=>{
   document.getElementById('loadingOverlay').style.display = 'flex';
 
   try {
-    const res = await fetch("/api/proxy", {
+    const res = await fetch("/api/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -259,6 +259,7 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
 
 
