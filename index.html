@@ -211,6 +211,9 @@ document.getElementById('diwaliForm').onsubmit=async (e)=>{
 
   let screenshotFile=document.getElementById('screenshot').files[0];
   if(!screenshotFile){ alert('Please upload payment screenshot'); return; }
+
+const screenshotBase64 = await resizeImage(screenshotFile, 800, 800);
+  
   let reader=new FileReader();
   reader.onload = async function() {
   const base64 = reader.result;
@@ -276,6 +279,7 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
 
 
