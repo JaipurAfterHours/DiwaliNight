@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbwI56sGr98U4Qbk3FGrPnImWOwnL4tM2NSh-du-IsMZ/exec', // <-- replace with your Apps Script URL
+      'https://script.google.com/macros/s/AKfycbx3-QYImVQGlTdY6J9Plhr72_l-a2t03E3PUx_ZvnZRk4vUsS4ITwqmwFYBqNLEvLKi/exec', // <-- replace with your Apps Script URL
       {
         method: 'POST',
         body: JSON.stringify(req.body),
@@ -23,4 +23,5 @@ export default async function handler(req, res) {
     res.status(500).json({ status: 'error', message: err.message });
   }
 }
+
 
