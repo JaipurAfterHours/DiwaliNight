@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Diwali Night Registration ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#fdfaf7; --gold:#d8b384; --dark-gold:#b89263; --text:#2b2b2b; --border:#e9dfd2; --sparkle:rgba(255,215,150,0.55);
+}
+*{box-sizing:border-box}
+body{ font-family:Inter,system-ui,Arial,sans-serif; background:var(--cream); color:var(--text); margin:0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+header{ text-align:center; background:linear-gradient(135deg,#fff5ea,#fdecd2); padding:56px 20px 32px; border-bottom:1px solid var(--border); position:relative; overflow:hidden;}
+header::before, header::after{ content:"🪔"; position:absolute; font-size:3.6rem; opacity:0.16; }
+header::before{ left:8%; top:14%; animation:float 5s ease-in-out infinite alternate; }
+header::after{ right:8%; bottom:8%; animation:float 6s ease-in-out infinite alternate-reverse; }
+@keyframes float{ from{transform:translateY(0)} to{transform:translateY(-14px)} }
+header h1{ font-family:'Playfair Display',serif; font-size:2.6rem; color:var(--dark-gold); margin:0 0 8px; }
+header p{ max-width:780px; margin:0 auto; font-size:1rem; line-height:1.6; color:rgba(43,43,43,0.95); }
+header a{ color:var(--dark-gold); text-decoration:none; font-weight:600; }
+.header-note{ margin-top:12px; color:#6a5846; font-size:0.95rem; }
+
+.container{ max-width:760px; margin:28px auto; padding:0 18px; }
+.details-box{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:22px 26px; box-shadow:0 6px 18px rgba(0,0,0,0.04); color:#4b4036; margin-bottom:22px; }
+.details-box ul{ margin:8px 0 0 18px; padding:0; color:#4b4036; }
+.details-grid{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; }
+.detail-pill{ background:linear-gradient(180deg,#fffaf3,#fff6ea); border:1px solid var(--border); padding:10px 12px; border-radius:10px; font-weight:600; color:#6e543b; box-shadow:0 2px 8px rgba(0,0,0,0.03); }
+
+form{ background:#fff; border-radius:12px; border:1px solid var(--border); box-shadow:0 8px 30px rgba(0,0,0,0.06); overflow:hidden; }
+.step{ display:none; padding:36px 28px; text-align:center; }
+.step.active{ display:block; animation:fadeIn .35s ease; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16px; font-size:1.6rem; }
+.input, select{ width:86%; max-width:460px; padding:12px 14px; margin:10px auto; display:block; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:1rem; }
+.input:focus, select:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 5px rgba(216,179,132,0.12); }
+.small{ font-size:.92rem; color:#6b5b4b; margin-top:6px; }
+.person-fields{ background:#fffaf7; border:1px solid var(--border); border-radius:10px; padding:12px; width:86%; margin:12px auto; text-align:left; }
+.person-fields h4{ margin:0 0 8px; font-size:1rem; color:#6e543b; }
+.controls{ display:flex; justify-content:center; gap:12px; margin-top:10px; flex-wrap:wrap; }
+.btn{ background:var(--gold); color:#fff; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:600; transition:all .18s; }
+.btn.secondary{ background:#fff; color:var(--dark-gold); border:1px solid var(--border); }
+.btn:hover{ transform:translateY(-3px); box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+.summary{ margin:14px auto 4px; font-weight:700; color:#7a4f34; }
+#qr{ width:200px; margin:14px auto; border-radius:8px; border:1px solid var(--border); display:block; }
+#successMsg{ display:none; background:#e8f8e3; color:#24562b; padding:12px; border-radius:10px; width:88%; margin:18px auto; font-weight:600; }
+.note{ font-size:.9rem; color:#7b6a5b; margin-top:6px; }
+.sparkle{ position:absolute; inset:0; pointer-events:none; }
+.sparkle span{ position:absolute; width:6px; height:6px; background:var(--sparkle); border-radius:50%; animation:spark 3s infinite ease-in-out; opacity:0; }
+@keyframes spark{ 0%,100%{ opacity:0; transform:translateY(0) scale(.8) } 50%{ opacity:1; transform:translateY(-8px) scale(1.2) } }
+@media (max-width:560px){ header h1{ font-size:1.8rem } .input, select, .person-fields{ width:94% } .detail-pill{ flex:1 } }
+</style>
+</head>
+<body>
+<header>
+  <h1>✨ Diwali Night: A Night Under The Sky ✨</h1>
+  <p><strong>Jaipur After Hours x The Forresta</strong></p>
+  <p class="header-note">📍 <a href="https://maps.app.goo.gl/V9sfvTeTSCVdNRBR9" target="_blank" rel="noopener">The Forresta : https://maps.app.goo.gl/V9sfvTeTSCVdNRBR9</a>  &nbsp; | &nbsp; 📅 17th October  &nbsp; | &nbsp; 👗 Ethnic</p>
+  <div class="sparkle" aria-hidden="true"></div>
+</header>
+
+<div class="container">
+  <div class="details-box" role="region" aria-label="Event details">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <p style="margin:0 0 8px 0;"><strong>Not your usual Diwali — this is <span style="color:var(--dark-gold)">Jaipur After Hours</span></strong></p>
+        <ul>
+          <li>💃 Desi beats & elegant fits</li>
+          <li>🔥 Fire dance floors</li>
+          <li>🌌 Celebrate Diwali under the stars</li>
+        </ul>
+      </div>
+      <div class="details-grid" style="align-items:center">
+        <div class="detail-pill">👨 Male Stag • ₹2000</div>
+        <div class="detail-pill">👩 Female Stag • ₹1500</div>
+        <div class="detail-pill">💑 Couple • ₹2500</div>
+      </div>
+    </div>
+    <div style="margin-top:12px" class="note">Table reservations: 4 — ₹12,000 · 8 — ₹22,000 · 10 — ₹25,000. On-spot charges may differ.</div>
+  </div>
+
+  <form id="diwaliForm" novalidate>
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <h2>Main Person</h2>
+      <input class="input" id="main_name" placeholder="Full name" required>
+      <input class="input" id="main_instagram" placeholder="Instagram link (handle or full url)" required>
+      <input class="input" id="main_mobile" placeholder="Mobile number" inputmode="tel" pattern="[0-9]{10}" required>
+      <input class="input" id="main_email" placeholder="Email address" type="email" required>
+      <select class="input" id="main_gender" required>
+        <option value="">Select gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <div class="controls">
+        <button type="button" class="btn" id="toStep2">Next ➡️</button>
+      </div>
+      <div class="small">All fields are required.</div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <h2>How many people (including you)?</h2>
+      <input class="input" id="numPeople" type="number" min="1" value="1" required>
+      <div class="controls">
+        <button type="button" class="btn secondary" id="backTo1">⬅️ Back</button>
+        <button type="button" class="btn" id="toStep3">Next ➡️</button>
+      </div>
+      <div class="small">Enter total attendees including the main person.</div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <h2>Guest Details</h2>
+      <div id="peopleContainer" aria-live="polite"></div>
+      <div class="summary" id="calcSummary">💰 Total Payment: ₹0</div>
+      <div class="controls">
+        <button type="button" class="btn secondary" id="backTo2">⬅️ Back</button>
+        <button type="button" class="btn" id="toStep4">Next ➡️</button>
+      </div>
+      <div class="small">All guest fields (name, instagram, gender) are required if you added guests.</div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step4">
+      <h2>Payment & Confirmation</h2>
+      <div class="summary" id="finalBreakdown">💰 Total Payment: ₹0</div>
+      <p class="small">Please scan the UPI QR and upload payment screenshot with transaction ID.</p>
+      <img id="qr" src="YOUR_UPI_QR.png" alt="UPI QR code (replace image file)" />
+      <input class="input" id="upiTxn" placeholder="UPI Transaction ID (e.g. TXN12345)" required>
+      <input class="input" id="upiScreenshot" type="file" accept="image/*" required>
+      <div class="controls">
+        <button type="button" class="btn secondary" id="backTo3">⬅️ Back</button>
+        <button type="submit" class="btn" id="submitBtn">Submit ✅</button>
+      </div>
+      <div class="note" style="margin-top:10px">We will verify payment manually. Keep the transaction ID safe.</div>
+    </div>
+  </form>
+
+  <div id="successMsg">✅ Registration received — thank you! We'll contact you with confirmation.</div>
+</div>
+
+<script>
+/* ---------- state & helpers ---------- */
+const steps = Array.from(document.querySelectorAll('.step'));
+let currentStep = 0;
+let totalAmount = 0;
+
+function showStep(index){
+  steps.forEach((s,i)=> s.classList.toggle('active', i===index));
+  currentStep = index;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* validation helpers */
+function isNotEmpty(el){ return el && el.value && el.value.trim() !== ''; }
+function validateMainPerson(){
+  const mainName = document.getElementById('main_name');
+  const mainInsta = document.getElementById('main_instagram');
+  const mainMobile = document.getElementById('main_mobile');
+  const mainEmail = document.getElementById('main_email');
+  const mainGender = document.getElementById('main_gender');
+  if(!isNotEmpty(mainName) || !isNotEmpty(mainInsta) || !isNotEmpty(mainMobile) || !isNotEmpty(mainEmail) || !isNotEmpty(mainGender)) return false;
+  const mobile = mainMobile.value.replace(/\D/g,'');
+  if(mobile.length < 10) return false;
+  return true;
+}
+
+/* generate guest fields */
+function generateGuestFields(){
+  const num = parseInt(document.getElementById('numPeople').value) || 1;
+  const container = document.getElementById('peopleContainer');
+  container.innerHTML = '';
+
+  if(num <= 1){
+    calculateAndShow(); // no additional guests
+    return;
+  }
+
+  for(let i=2;i<=num;i++){
+    const wrap = document.createElement('div');
+    wrap.className = 'person-fields';
+    wrap.innerHTML = `
+      <h4>Guest ${i}</h4>
+      <input class="input guest-name" placeholder="Full name" required />
+      <input class="input guest-insta" placeholder="Instagram link or handle" required />
+      <select class="input guest-gender" required>
+        <option value="">Select gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    `;
+    container.appendChild(wrap);
+  }
+
+  attachGuestListeners();
+  calculateAndShow();
+}
+
+/* attach listeners to dynamically created guest fields */
+function attachGuestListeners(){
+  const container = document.getElementById('peopleContainer');
+  // listen for change on all guest gender selects
+  container.querySelectorAll('select.guest-gender').forEach(sel=>{
+    sel.removeEventListener('change', calculateAndShow);
+    sel.addEventListener('change', calculateAndShow);
+  });
+  // when guest name/insta change, no need to recalc totals but keep them required
+  container.querySelectorAll('input.guest-name, input.guest-insta').forEach(inp=>{
+    inp.addEventListener('input', ()=>{/* nothing but ensures required attribute works */});
+  });
+}
+
+/* calculate couples & total */
+function calculateTotals(){
+  let males = 0, females = 0;
+  const mainGender = document.getElementById('main_gender').value;
+  if(mainGender === 'Male') males++;
+  else if(mainGender === 'Female') females++;
+
+  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
+    const v = sel.value;
+    if(v === 'Male') males++;
+    else if(v === 'Female') females++;
+  });
+
+  const couples = Math.min(males, females);
+  const remainingMales = males - couples;
+  const remainingFemales = females - couples;
+  const total = (couples * 2500) + (remainingMales * 2000) + (remainingFemales * 1500);
+
+  return { couples, remainingMales, remainingFemales, total, males, females };
+}
+
+/* update UI summary */
+function calculateAndShow(){
+  const res = calculateTotals();
+  totalAmount = res.total;
+  const summaryEl = document.getElementById('calcSummary');
+  const finalEl = document.getElementById('finalBreakdown');
+  summaryEl.textContent = `💰 Total: ₹${res.total} • Couples: ${res.couples}, Males: ${res.remainingMales}, Females: ${res.remainingFemales}`;
+  finalEl.textContent = `💰 Total Payment: ₹${res.total} — Couples: ${res.couples}, Single Males: ${res.remainingMales}, Single Females: ${res.remainingFemales}`;
+}
+
+/* validate guest fields */
+function validateGuests(){
+  const num = parseInt(document.getElementById('numPeople').value) || 1;
+  if(num <= 1) return true;
+  const container = document.getElementById('peopleContainer');
+  const names = container.querySelectorAll('input.guest-name');
+  const instas = container.querySelectorAll('input.guest-insta');
+  const genders = container.querySelectorAll('select.guest-gender');
+  for(let i=0;i<names.length;i++){
+    if(!isNotEmpty(names[i]) || !isNotEmpty(instas[i]) || !isNotEmpty(genders[i])) return false;
+  }
+  return true;
+}
+
+/* navigation wiring */
+document.getElementById('toStep2').addEventListener('click', ()=>{
+  if(!validateMainPerson()){
+    alert('Please complete main person details correctly (all fields required, valid mobile/email).');
+    return;
+  }
+  showStep(1);
+});
+
+document.getElementById('backTo1').addEventListener('click', ()=> showStep(0));
+document.getElementById('toStep3').addEventListener('click', ()=>{
+  const n = parseInt(document.getElementById('numPeople').value);
+  if(!n || n < 1){ alert('Please enter total number of people (at least 1).'); return; }
+  generateGuestFields();
+  showStep(2);
+});
+document.getElementById('backTo2').addEventListener('click', ()=> showStep(1));
+document.getElementById('toStep4').addEventListener('click', ()=>{
+  if(!validateGuests()){ alert('Please fill all guest details (name, instagram, gender).'); return; }
+  calculateAndShow();
+  showStep(3);
+});
+document.getElementById('backTo3').addEventListener('click', ()=> showStep(2));
+
+/* recalc when main gender or numPeople changes */
+document.getElementById('main_gender').addEventListener('change', calculateAndShow);
+document.getElementById('numPeople').addEventListener('input', ()=>{/* no auto-generate until next pressed */});
+
+/* submit handler */
+// ---- SUBMIT HANDLER FIX ----
+document.getElementById("diwaliForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  // Collect main person data
+  const main_name = document.getElementById("main_name").value.trim();
+  const main_instagram = document.getElementById("main_instagram").value.trim();
+  const main_mobile = document.getElementById("main_mobile").value.trim();
+  const main_email = document.getElementById("main_email").value.trim();
+  const main_gender = document.getElementById("main_gender").value.trim();
+  const upiTxn = document.getElementById("upiTxn").value.trim();
+
+  // Calculate total
+  const totals = calculateTotals();
+  const totalAmount = totals.total;
+
+  // Collect guest data
+  const guests = [];
+  document.querySelectorAll("#peopleContainer .person-fields").forEach((box) => {
+    guests.push({
+      name: box.querySelector(".guest-name")?.value.trim() || "",
+      instagram: box.querySelector(".guest-insta")?.value.trim() || "",
+      gender: box.querySelector(".guest-gender")?.value.trim() || ""
+    });
+  });
+
+  // Screenshot file
+  const screenshotFile = document.getElementById("upiScreenshot").files[0];
+
+  // Prepare form data
+  const mainFormData = {
+    main_name,
+    main_instagram,
+    main_mobile,
+    main_email,
+    main_gender,
+    totalAmount,
+    upiTxn,
+    guests,
+    timestamp: new Date().toLocaleString()
+  };
+
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(mainFormData));
+
+  if (screenshotFile) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Image = reader.result.split(",")[1]; // remove prefix
+      formData.append("file", base64Image);
+      formData.append("filename", screenshotFile.name);
+      formData.append("mimetype", screenshotFile.type);
+
+      await sendToAppsScript(formData);
+    };
+    reader.readAsDataURL(screenshotFile);
+  } else {
+    await sendToAppsScript(formData);
+  }
+
+  async function sendToAppsScript(fd) {
+    try {
+      await fetch(
+        "https://script.google.com/macros/s/AKfycbzIN2t42cp093VFzkM_UUhF2b8xbMYCsrQwWEQh4fG2-TfUskIgBdTnqgmGeof1TRiwrQ/exec", // replace with your URL
+        {
+          method: "POST",
+          body: fd
+        }
+      );
+
+      document.getElementById("successMsg").style.display = "block";
+      e.target.reset();
+      showStep(0);
+    } catch (err) {
+      alert("⚠️ Error submitting form. Please try again!");
+      console.error(err);
+    }
+  }
+});
+
+
+/* collect submission data */
+function collectSubmissionData(){
+  const main = {
+    name: document.getElementById('main_name').value.trim(),
+    instagram: document.getElementById('main_instagram').value.trim(),
+    mobile: document.getElementById('main_mobile').value.trim(),
+    email: document.getElementById('main_email').value.trim(),
+    gender: document.getElementById('main_gender').value
+  };
+  const num = parseInt(document.getElementById('numPeople').value) || 1;
+  const guests = [];
+  document.querySelectorAll('#peopleContainer .person-fields').forEach((div, idx)=>{
+    const name = div.querySelector('input.guest-name').value.trim();
+    const insta = div.querySelector('input.guest-insta').value.trim();
+    const gender = div.querySelector('select.guest-gender').value;
+    guests.push({ name, insta, gender });
+  });
+  const totals = calculateTotals();
+  const upiTxn = document.getElementById('upiTxn') ? document.getElementById('upiTxn').value.trim() : '';
+  return { main, totalPeople: num, guests, totals, upiTxn };
+}
+
+/* sparkle generator */
+(function generateSparkles(){
+  const sparkle = document.querySelector('.sparkle');
+  if(!sparkle) return;
+  for(let i=0;i<22;i++){
+    const s = document.createElement('span');
+    s.style.left = (Math.random()*100)+'%';
+    s.style.top = (Math.random()*100)+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    sparkle.appendChild(s);
+  }
+})();
+
+/* initial calc to show main only if gender selected */
+calculateAndShow();
+</script>
+</body>
+</html>
