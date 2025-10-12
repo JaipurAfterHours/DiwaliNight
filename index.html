@@ -221,15 +221,21 @@ const screenshotBase64 = await resizeImage(screenshotFile, 800, 800);
   document.getElementById('loadingOverlay').style.display='flex';
   try {
     const res = await fetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        main_name, main_instagram, main_mobile, main_email, main_gender,
-        upiTxn, totalAmount, guests: guestData,
-        screenshotBase64: base64,
-        screenshotName: screenshotFile.name
-      })
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    main_name,
+    main_instagram,
+    main_mobile,
+    main_email,
+    main_gender,
+    upiTxn,
+    totalAmount,
+    guests: guestData,
+    screenshotBase64,
+    screenshotName: screenshotFile.name
+  })
+});
 
     const data = await res.json();
     document.getElementById('loadingOverlay').style.display='none';
@@ -279,6 +285,7 @@ function closeModal(){ document.getElementById('successModal').classList.remove(
 </script>
 </body>
 </html>
+
 
 
 
