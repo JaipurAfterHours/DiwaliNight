@@ -75,6 +75,9 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
         <div class="detail-pill">👩 Female Stag • ₹1000</div>
         <div class="detail-pill">💑 Couple • ₹2500</div>
       </div>
+      <div class="details-grid" style="align-items:center">
+        <div class="detail-pill">FULL COVER</div>
+      </div>
     </div>
     <div style="margin-top:12px" class="note">NOTE : On-spot charges may differ.</div>
   </div>
@@ -137,6 +140,15 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
     </div>
   </form>
 
+  <div id="earlyBirdPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:24px 32px; border-radius:12px; text-align:center; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+    <h2 style="color:#d84315; margin-bottom:12px;">🎉 Early Bird Offer!</h2>
+    <p>Girls Stag: FREE  <br> Couple: ₹1000 only (Full Cover) </p>
+    <button id="closeEarlyBird" style="margin-top:16px; padding:10px 20px; border:none; border-radius:8px; background:#d8b384; color:#fff; cursor:pointer;">Got it!</button>
+  </div>
+</div>
+
+
   <div id="successPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; padding:24px 32px; border-radius:12px; text-align:center; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
     <h2 style="color:green; margin-bottom:12px;">✅ Registration Successful!</h2>
@@ -147,6 +159,8 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
 </div>
 
 <script>
+
+  const EARLY_BIRD_ACTIVE = true;
 /* ---------- state & helpers ---------- */
 
 const WEBHOOK_URL = 'https://adminharsh.app.n8n.cloud/webhook/diwali-registration';
@@ -220,13 +234,35 @@ function attachGuestListeners(){
 }
 
 /* calculate couples & total */
-function calculateTotals(){
+// normal price
+//   function calculateTotals(){
+//   let males = 0, females = 0;
+//   const mainGender = document.getElementById('main_gender').value;
+//   if(mainGender === 'Male') males++;
+//   else if(mainGender === 'Female') females++;
+
+//   document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
+//     const v = sel.value;
+//     if(v === 'Male') males++;
+//     else if(v === 'Female') females++;
+//   });
+
+//   const couples = Math.min(males, females);
+//   const remainingMales = males - couples;
+//   const remainingFemales = females - couples;
+//   const total = (couples * 2500) + (remainingMales * 2000) + (remainingFemales * 1000);
+
+//   return { couples, remainingMales, remainingFemales, total, males, females };
+// }
+
+// Early Bird Price
+  function calculateTotals() {
   let males = 0, females = 0;
   const mainGender = document.getElementById('main_gender').value;
   if(mainGender === 'Male') males++;
   else if(mainGender === 'Female') females++;
 
-  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel=>{
+  document.querySelectorAll('#peopleContainer select.guest-gender').forEach(sel => {
     const v = sel.value;
     if(v === 'Male') males++;
     else if(v === 'Female') females++;
@@ -235,7 +271,20 @@ function calculateTotals(){
   const couples = Math.min(males, females);
   const remainingMales = males - couples;
   const remainingFemales = females - couples;
-  const total = (couples * 2500) + (remainingMales * 2000) + (remainingFemales * 1000);
+
+  // --- Early Bird Prices ---
+  let total = 0;
+  // Main person
+  if(mainGender === 'Male') total += 2000;
+  else if(mainGender === 'Female') total += 0; // Female Stag free
+  // Guests
+  document.querySelectorAll('#peopleContainer .person-fields').forEach(div => {
+    const gender = div.querySelector('select.guest-gender').value;
+    if(gender === 'Male') total += 2000;
+    else if(gender === 'Female') total += 0; // free
+  });
+  // Couples price
+  total += couples * 1000; // early bird couple price
 
   return { couples, remainingMales, remainingFemales, total, males, females };
 }
@@ -301,11 +350,18 @@ document.getElementById('diwaliForm').addEventListener('submit', async function(
   const fileInput = document.getElementById('upiScreenshot');
 
   // 🧩 Validation
-  if (!txn || !txn.value.trim()) {
-    alert('⚠️ Please enter the UPI transaction ID.');
-    showStep(3);
-    return;
-  }
+  // if (!txn || !txn.value.trim()) {
+  //   alert('⚠️ Please enter the UPI transaction ID.');
+  //   showStep(3);
+  //   return;
+  // }
+
+  if (!allGirls) { // Only validate payment if not all girls under early bird
+    if (!txn || !txn.value.trim()) {
+      alert('⚠️ Please enter the UPI transaction ID.');
+      showStep(3);
+      return;
+    }
 
   if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
     alert('⚠️ Please upload the payment screenshot.');
@@ -314,9 +370,17 @@ document.getElementById('diwaliForm').addEventListener('submit', async function(
   }
 
   // 🧩 Prepare data
-  const payload = collectSubmissionData();
-  const file = fileInput.files[0];
-  const base64File = await toBase64(file);
+  // const payload = collectSubmissionData();
+  // const file = fileInput.files[0];
+  // const base64File = await toBase64(file);
+    
+const payload = collectSubmissionData();
+  let base64File = "";
+  if(!allGirls){ // only convert file if payment required
+    const file = fileInput.files[0];
+    base64File = await toBase64(file);
+  }
+    
 
   const dataToSend = {
     ...payload,
@@ -416,6 +480,15 @@ function collectSubmissionData(){
 
 /* initial calc to show main only if gender selected */
 calculateAndShow();
+
+indow.addEventListener('load', () => {
+  document.getElementById('earlyBirdPopup').style.display = 'flex';
+});
+
+document.getElementById('closeEarlyBird').addEventListener('click', () => {
+  document.getElementById('earlyBirdPopup').style.display = 'none';
+});
+  
 </script>
 </body>
 </html>
