@@ -81,11 +81,23 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
       </div>
       <div class="details-grid" style="align-items:center">
         <div class="detail-pill">👨 Male Stag • ₹2000</div>
-        <div class="detail-pill">👩 Female Stag • ₹1000</div>
+        <div class="detail-pill">👩 Female Duo • ₹2000</div>
         <div class="detail-pill">💑 Couple • ₹2000</div>
       </div>
-    </div>
-    <div style="margin-top:12px" class="note">* Table Booking Live Tomorrow</div>
+    </div><br>
+      <div>
+        <p style="margin:0 0 8px 0;"><strong>TABLE CHARGES (limited slots with full cover)</strong></p>
+        <ul>
+          <li> TABLE for 4 : ₹15000</li>
+          <li> TABLE for 6 : ₹20000</li>
+          <li> TABLE for 8 : ₹28000</li>
+        </ul>
+      </div>
+      <br>
+      <div>
+        <p style="margin:0 0 8px 0;"><strong>For more details contact : 7790820654, 900176204</strong></p>
+
+      </div>
   </div>
 
   <form id="diwaliForm" novalidate>
@@ -153,6 +165,15 @@ h2{ font-family:'Playfair Display',serif; color:var(--dark-gold); margin:0 0 16p
       <div class="note" style="margin-top:10px">We will verify payment manually. Keep the transaction ID safe.</div>
     </div>
   </form>
+  
+  <div id="warningPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:24px 32px; border-radius:12px; text-align:center; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+    <h2 style="color:#b89263; margin-bottom:12px;">⚠️ Warning</h2>
+    <p id="warningMessage">You must add at least 2 female guests or 1 male or 1 couple.</p>
+    <button id="closeWarning" style="margin-top:16px; padding:10px 20px; border:none; border-radius:8px; background:#d8b384; color:#fff; cursor:pointer;">OK</button>
+  </div>
+</div>
+
 
   <div id="successPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; padding:24px 32px; border-radius:12px; text-align:center; max-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
@@ -299,11 +320,31 @@ document.getElementById('toStep3').addEventListener('click', ()=>{
   showStep(2);
 });
 document.getElementById('backTo2').addEventListener('click', ()=> showStep(1));
-document.getElementById('toStep4').addEventListener('click', ()=>{
-  if(!validateGuests()){ alert('Please fill all guest details (name, instagram, gender).'); return; }
+document.getElementById('toStep4').addEventListener('click', ()=> {
+  if(!validateGuests()){ 
+    showWarning('Please fill all guest details (name, instagram, gender).'); 
+    return; 
+  }
+
+  const totals = calculateTotals();
+  const { males, females } = totals;
+
+  const hasValidCombination = (
+    males >= 1 ||            // at least 1 male
+    (males >=1 && females >=1) || // 1 couple
+    females >= 2             // 2 females
+  );
+
+  if(!hasValidCombination){
+    showWarning('Registration requires at least 1 male, or 1 couple, or 2 females.');
+    return;
+  }
+
   calculateAndShow();
   showStep(3);
 });
+
+
 document.getElementById('backTo3').addEventListener('click', ()=> showStep(2));
 
 /* recalc when main gender or numPeople changes */
@@ -454,6 +495,19 @@ function collectSubmissionData(){
     sparkle.appendChild(s);
   }
 })();
+
+function showWarning(message){
+  const popup = document.getElementById('warningPopup');
+  const msgEl = document.getElementById('warningMessage');
+  msgEl.textContent = message;
+  popup.style.display = 'flex';
+}
+
+// Close button
+document.getElementById('closeWarning').addEventListener('click', ()=>{
+  document.getElementById('warningPopup').style.display = 'none';
+});
+
 
 /* initial calc to show main only if gender selected */
 calculateAndShow();
