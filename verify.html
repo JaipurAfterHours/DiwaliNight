@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Verification - Diwali Night</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background: #fff8e7;
+    }
+    .card {
+      display: inline-block;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: white;
+    }
+    h1 { color: #d97706; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <div class="card" id="result">Verifying QR...</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const backendURL = "https://script.google.com/macros/s/AKfycbx3-QYImVQGlTdY6J9Plhr72_l-a2t03E3PUx_ZvnZRk4vUsS4ITwqmwFYBqNLEvLKi/exec"; // paste your Apps Script URL here
+
+    fetch(`${backendURL}?id=${id}`)
+      .then(res => res.json())
+      .then(data => {
+        const div = document.getElementById("result");
+        if (data.success) {
+          div.innerHTML = `
+            <h1 class="success">✅ Verified!</h1>
+            <p><b>Name:</b> ${data.name}</p>
+            <p><b>Email:</b> ${data.email}</p>
+            <p><a href="${data.payment}" target="_blank">View Payment Screenshot</a></p>
+            <p style="color:green;">QR marked as Used.</p>
+          `;
+        } else {
+          div.innerHTML = `<h1 class="error">❌ ${data.message}</h1>`;
+        }
+      })
+      .catch(() => {
+        document.getElementById("result").innerHTML = "<h1 class='error'>Server Error</h1>";
+      });
+  </script>
+</body>
+</html>
